@@ -36,10 +36,11 @@ func main() {
 
 	// graceful shutdown using go routine
 	go func() {
+		// wait for kill signal
 		sig := <-killSig
 		logger.Info("got kill signal >> shutting down!", slog.String("signal", sig.String()))
 
-		// use timer to shutdown or else exit with an error
+		// use timer to shutdown or else exit immediately with an error
 		shutdownCtx, cancel := context.WithTimeout(serverCtx, 5*time.Second)
 
 		go func() {
@@ -47,8 +48,12 @@ func main() {
 
 			if shutdownCtx.Err() == context.DeadlineExceeded {
 				log.Fatal("shutdown deadline exceeded")
+				os.Exit(1)
 			}
 		}()
+		// Simulate delay in shutdown
+		logger.Info("Simulating shutdown delay")
+		time.Sleep(1 * time.Second)
 
 		err := svr.Shutdown(shutdownCtx)
 		if err != nil {
