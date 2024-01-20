@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"url-shortener/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -33,6 +34,7 @@ func main() {
 		Addr:    ":8080",
 		Handler: r,
 	}
+	r.Get("/healthcheck", handlers.NewHealthHandler().ServeHTTP)
 
 	// graceful shutdown using go routine
 	go func() {
@@ -72,7 +74,6 @@ func main() {
 		}
 
 	}()
-
 	logger.Info("ready to 🚀")
 
 	<-serverCtx.Done()
