@@ -34,9 +34,8 @@ func main() {
 		Addr:    ":8080",
 		Handler: r,
 	}
-	// r.Get("/healthcheck", handlers.NewHealthHandler().ServeHTTP)
-
 	r.Get("/healthcheck", handlers.NewHealthHandler().ServeHTTP)
+
 	// graceful shutdown using go routine
 	go func() {
 		// wait for kill signal
