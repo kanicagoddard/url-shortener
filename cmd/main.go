@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 	"url-shortener/internal/handlers"
+	"url-shortener/store/dbstore"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -34,8 +35,10 @@ func main() {
 		Addr:    ":8080",
 		Handler: r,
 	}
-	r.Get("/healthcheck", handlers.NewHealthHandler().ServeHTTP)
 
+	shortURLstore := dbstore.NewShortURLStore(dbstore.NewShortURLStoreParams{
+		Logger: logger,
+	})
 	// graceful shutdown using go routine
 	go func() {
 		// wait for kill signal
@@ -74,6 +77,12 @@ func main() {
 		}
 
 	}()
+	r.Get("/healthcheck", handlers.NewHealthHandler().ServeHTTP)
+
+	r.Post("/shorturl", handlers.NewCreateShortURLHandler(handlers.CreateShortURLHandlerParams{
+		ShortURLStore: shortURLstore,
+	}).ServerHTTP)
+
 	logger.Info("ready to 🚀")
 
 	<-serverCtx.Done()
